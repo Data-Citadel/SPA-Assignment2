@@ -88,17 +88,25 @@ cust_out_df = cust_stream_df.join(cust_dim, "cust_id")
 ###############################################
 # Apply Promos / offers 
 ##############################################
+# dict of promo_name and condition 
 promo_dict = {
-      "PROMO 1" : "case when  ",
-      "PROMO 2" : "case when " ,
-      "PROMO 3" : "case when  ",
-      "PROMO 4" : "case when " ,
-      "PROMO 5" : "case when  ",
+      "PROMO 1 - Flat 20% discount on All products*" : " is_near_to_mall = 1 and annual_income > 30 ",
+      "PROMO 2 - Upto 30% discount on Electronics " : " gender='Male' and is_within_mall = 1 " ,
+      "PROMO 3 - Flat 30% woman clotings" : " gender = 'Female' and age >= 15 ",
+      "PROMO 4 - Upto 40% on Games" : " spending_more_time_in_mall = 1 " ,
+      "PROMO 5 - Flat 10% New Arrivals" : " spending_score_cat = 'High' ",
  }
+expression = " CASE "
+for promo,condition in promo_dict.items():
+      expression = expression + " WHEN "+condition +" THEN '"+ promo+ "' "
+
+expression = expression + " ELSE 'NA' END as promo"
+
+# Apply promo condition on stream dataframe
+cust_out_df = cust_out_df.selectExpr(expression, "cust_id")
 
 cust_out_df.writeStream \
       .format("console") \
       .outputMode("complete") \
       .start() \
       .awaitTermination()
-
