@@ -9,17 +9,17 @@ class Rand_Customer_Producer:
     '''
         bootstrap_servers - bootstap server name 
         sample_range - Range of number of customer need to drwan from total set
-        radious  - distance of the customer from shop 
-                [0 - 1] - with in shop
-                [2 - 3] - very near to shop
-                [4 - 6] - near to shop
-                [7 - 10] - slightly away from shop
+        radius  - distance of the customer from shop 
+                [0 - 1] - with in mall
+                [2 - 3] - very near to mall
+                [4 - 6] - near to mall
+                [7 - 10] - slightly away from mall
         total_customers - total set we wanted to consider
     '''
 
-    def __init__(self,bootstrap_servers,sample_range,radious,total_customers):
+    def __init__(self,bootstrap_servers,sample_range,radius,total_customers):
         self.sample_range = sample_range
-        self.radious = radious
+        self.radius = radius
         self.total_customers = total_customers
         self. producer = self._get_kafka_producer(bootstrap_servers)
 
@@ -31,7 +31,7 @@ class Rand_Customer_Producer:
         return producer
 
 
-    def _generateRamdomCustomer(self,sample_size=10,radious=10,total_size=200):
+    def _generateRamdomCustomer(self,sample_size=10,radius=10,total_size=200):
         
         cust_list = []
         #Create total setof customers
@@ -42,7 +42,7 @@ class Rand_Customer_Producer:
 
         #add distance to customer
         for i in selected_cust:
-            cust_list.append((i,random.randrange(0,radious)))
+            cust_list.append((i,random.randrange(0,radius)))
         
         return cust_list
 
@@ -51,7 +51,7 @@ class Rand_Customer_Producer:
         size=random.choice(self.sample_range)
         
         #generate customer list with distance
-        customers = self._generateRamdomCustomer(sample_size=size,radious= self.radious, total_size =self.total_customers)
+        customers = self._generateRamdomCustomer(sample_size=size,radius= self.radius, total_size =self.total_customers)
         
         # publish the customer with distance in kafka topic
         for customer in customers:
@@ -71,13 +71,13 @@ if __name__ == "__main__":
     bootstrap_servers = 'localhost:9092'
     topic_name = "test"
     total_customers = 200
-    sample_range = range(15, 30)
-    radious = 10
+    sample_range = range(30, 50)
+    radius = 10
 
     producer = Rand_Customer_Producer(bootstrap_servers=bootstrap_servers,
              sample_range=sample_range,
-             radious=radious,
+             radius=radius,
              total_customers=total_customers)
-    # time in min
+    # time in mins
     producer.send_msg_in_loop(topic_name, 1 , 5)
     
