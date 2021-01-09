@@ -19,3 +19,6 @@ kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partit
 
 Listen to topic 
 kafka-console-consumer --bootstrap-server localhost:9092 --topic test --from-beginning
+
+Delete Topic 
+kafka-topics --zookeeper localhost:2181 --delete --topic test
