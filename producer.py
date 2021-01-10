@@ -10,10 +10,10 @@ class Rand_Customer_Producer:
         bootstrap_servers - bootstap server name 
         sample_range - Range of number of customer need to drwan from total set
         radius  - distance of the customer from shop 
-                [0 - 1] - with in mall
-                [2 - 3] - very near to mall
-                [4 - 6] - near to mall
-                [7 - 10] - slightly away from mall
+                [0 - 2] - with in mall
+                [3 - 5] - very near to mall
+                [6 - 7] - near to mall
+                [8 - 10] - away from mall
         total_customers - total set we wanted to consider
     '''
 
@@ -69,9 +69,9 @@ class Rand_Customer_Producer:
 
 if __name__ == "__main__":
     bootstrap_servers = 'localhost:9092'
-    topic_name = "test"
+    topic_name = "mymall_cust_topic"
     total_customers = 200
-    sample_range = range(30, 50)
+    sample_range = range(40, 50)
     radius = 10
 
     producer = Rand_Customer_Producer(bootstrap_servers=bootstrap_servers,
@@ -79,5 +79,5 @@ if __name__ == "__main__":
              radius=radius,
              total_customers=total_customers)
     # time in mins
-    producer.send_msg_in_loop(topic_name, 1 , 5)
+    producer.send_msg_in_loop(topic_name, 1 , 25)
     

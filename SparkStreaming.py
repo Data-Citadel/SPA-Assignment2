@@ -12,6 +12,8 @@ spark = SparkSession.builder \
     .appName("MyMallStreamingApp") \
     .getOrCreate()
 
+spark.sparkContext.setLogLevel("ERROR")
+
 ######################################
 # Processing the customer profile data
 ######################################
@@ -44,9 +46,10 @@ cust_dim = spark.createDataFrame(cust_details)
 df = spark.readStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", "localhost:9092") \
-        .option("subscribe", "test") \
+        .option("subscribe", "mymall_cust_topic") \
         .option("startingOffsets", "earliest") \
         .load()
+
 # Preprocessing 
 # Extract the JSON values and split that json data in columns 
 value_df = df.selectExpr("CAST(value AS STRING)","timestamp")
@@ -102,11 +105,26 @@ for promo,condition in promo_dict.items():
 
 expression = expression + " ELSE 'NA' END as promo"
 
-# Apply promo condition on stream dataframe
+# Apply prod condition on stream dataframe
 cust_out_df = cust_out_df.selectExpr(expression, "cust_id")
 
-cust_out_df.writeStream \
-      .format("console") \
-      .outputMode("complete") \
-      .start() \
-      .awaitTermination()
+
+# To write the output on console
+
+#cust_out_df.writeStream \
+#      .format("console") \
+#      .outputMode("complete") \
+#      .start() \
+#      .awaitTermination()
+
+ds = cust_out_df \
+  .selectExpr("CAST(cust_id AS STRING) as key", "CAST(promo AS STRING) as value") \
+  .writeStream \
+  .format("kafka") \
+  .outputMode("update") \
+  .option("kafka.bootstrap.servers", "localhost:9092") \
+  .option("topic", "mymall_promo_topic") \
+  .option("checkpointLocation", "/tmp/checkpoint" ) \
+  .start() \
+  .awaitTermination()
+
